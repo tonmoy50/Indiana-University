@@ -20,6 +20,63 @@ def printable_board(board):
 
 # return a list of possible successor states
 def successors(state):
+    def move_right(board, row):
+        """Move the given row to one position right"""
+        board[row] = board[row][-1:] + board[row][:-1]
+        return board
+
+
+    def move_left(board, row):
+        """Move the given row to one position left"""
+        board[row] = board[row][1:] + board[row][:1]
+        return board
+
+
+    def rotate_right(board, row, residual):
+        board[row] = [board[row][0]] + [residual] + board[row][1:]
+        residual = board[row].pop()
+        return residual
+
+
+    def rotate_left(board, row, residual):
+        board[row] = board[row][:-1] + [residual] + [board[row][-1]]
+        residual = board[row].pop(0)
+        return residual
+
+
+    def move_clockwise(board):
+        """Move the outer ring clockwise"""
+        board[0] = [board[1][0]] + board[0]
+        residual = board[0].pop()
+        board = transpose_board(board)
+        residual = rotate_right(board, -1, residual)
+        board = transpose_board(board)
+        residual = rotate_left(board, -1, residual)
+        board = transpose_board(board)
+        residual = rotate_left(board, 0, residual)
+        board = transpose_board(board)
+        return board
+
+
+    def move_cclockwise(board):
+        """Move the outer ring counter-clockwise"""
+        board[0] = board[0] + [board[1][-1]]
+        residual = board[0].pop(0)
+        board = transpose_board(board)
+        residual = rotate_right(board, 0, residual)
+        board = transpose_board(board)
+        residual = rotate_right(board, -1, residual)
+        board = transpose_board(board)
+        residual = rotate_left(board, -1, residual)
+        board = transpose_board(board)
+        return board
+
+
+    def transpose_board(board):
+        """Transpose the board --> change row to column"""
+        return [list(col) for col in zip(*board)]
+
+
     moves = {
         "R1",
         "R2",
@@ -47,8 +104,13 @@ def successors(state):
         "Icc",
     }
 
+    successive_boards = list()
+    for move in moves:
+        turn, row = move[0], move[1:len(move)]
+        if turn == "L":
+            successive_boards.append(move_left(state, int(row)-1))
 
-    return True
+    return successive_boards
 
 
 # check if we've reached the goal
@@ -134,14 +196,11 @@ def solve(initial_board):
     curr_board = [
         list(initial_board[i : i + 5]) for i in range(0, len(initial_board), 5)
     ]
-    print(heuristic_cost(curr_board))
-    print(is_goal(curr_board))
+    # print(heuristic_cost(curr_board))
+    # print(is_goal(curr_board))
 
-    import os
-    print(os.getcwd())
-    with open("Fall2023/B551/Assignment2/Part2/board0.txt", "r") as f:
-        data = f.read()
-    print(data)
+    print(successors(curr_board))
+
 
     # print(heuristic_cost(state=initial_board))
 
