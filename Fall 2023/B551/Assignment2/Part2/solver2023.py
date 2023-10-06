@@ -20,12 +20,45 @@ def printable_board(board):
 
 # return a list of possible successor states
 def successors(state):
+    moves = {
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5",
+        "L1",
+        "L2",
+        "L3",
+        "L4",
+        "L5",
+        "U1",
+        "U2",
+        "U3",
+        "U4",
+        "U5",
+        "D1",
+        "D2",
+        "D3",
+        "D4",
+        "D5",
+        "Oc",
+        "Ic",
+        "Occ",
+        "Icc",
+    }
+
+
     return True
 
 
 # check if we've reached the goal
 def is_goal(state):
-    if state == tuple(range(1, 26)):
+    # if state == tuple(range(1, 26)):
+    #     return True
+    # else:
+    #     return False
+
+    if heuristic_cost(state) == 0:
         return True
     else:
         return False
@@ -57,7 +90,7 @@ def find_correct_position_of_block(block):
 # TO DO:
 # 1. Need to figure out number rotation based heuristics
 # 2. Check for total heuristic
-def heuristic_distance(state):
+def heuristic_cost(state):
     total = 0
     for i in range(len(state)):
         for j in range(len(state[0])):
@@ -66,8 +99,12 @@ def heuristic_distance(state):
                 total += find_distance_to_correct_position(
                     (i, j), find_correct_position_of_block(block)
                 )
-                print(block, total)
-        break
+                print(
+                    block,
+                    find_distance_to_correct_position(
+                        (i, j), find_correct_position_of_block(block)
+                    ),
+                )
 
     return total
 
@@ -97,9 +134,23 @@ def solve(initial_board):
     curr_board = [
         list(initial_board[i : i + 5]) for i in range(0, len(initial_board), 5)
     ]
-    print(heuristic_distance(curr_board))
+    print(heuristic_cost(curr_board))
+    print(is_goal(curr_board))
+
+    import os
+    print(os.getcwd())
+    with open("Fall2023/B551/Assignment2/Part2/board0.txt", "r") as f:
+        data = f.read()
+    print(data)
 
     # print(heuristic_cost(state=initial_board))
+
+
+
+
+
+
+    print()
     return ["Oc", "L2", "Icc", "R4"]
 
 
