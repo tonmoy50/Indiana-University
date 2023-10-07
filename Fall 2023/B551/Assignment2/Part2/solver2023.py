@@ -9,6 +9,7 @@
 import sys
 import numpy as np
 import copy
+import math
 
 ROWS = 5
 COLS = 5
@@ -114,12 +115,12 @@ def successors(state):
         if turn == "R":
             copy_state = copy.deepcopy(state)
             successive_boards.append(
-                (move_right(copy_state, int(row) - 1), "R" + str(int(row) - 1))
+                (move_right(copy_state, int(row) - 1), "R" + str(int(row)))
             )
         elif turn == "L":
             copy_state = copy.deepcopy(state)
             successive_boards.append(
-                (move_left(copy_state, int(row) - 1), "L" + str(int(row) - 1))
+                (move_left(copy_state, int(row) - 1), "L" + str(int(row)))
             )
         elif turn == "U":
             copy_state = copy.deepcopy(state)
@@ -128,7 +129,7 @@ def successors(state):
                     transpose_board(
                         move_left(transpose_board(copy_state), int(row) - 1)
                     ),
-                    "U" + str(int(row) - 1),
+                    "U" + str(int(row)),
                 )
             )
         elif turn == "D":
@@ -138,7 +139,7 @@ def successors(state):
                     transpose_board(
                         move_right(transpose_board(copy_state), int(row) - 1)
                     ),
-                    "D" + str(int(row) - 1),
+                    "D" + str(int(row)),
                 )
             )
         elif turn == "O" and row == "c":
@@ -191,7 +192,8 @@ def heuristic_cost(state):
 
 
 def find_distance_to_correct_position(curr_pos, correct_pos):
-    return abs(curr_pos[0] - correct_pos[0]) + abs(curr_pos[1] - correct_pos[1])
+    dist = abs(curr_pos[0] - correct_pos[0]) + abs(curr_pos[1] - correct_pos[1])
+    return dist if dist < 3 else math.ceil(3 / 2)
 
 
 def find_correct_position_of_block(block):
@@ -203,15 +205,14 @@ def find_correct_position_of_block(block):
 
 
 # Calculate manhattan distance from goal to current position of the whole board
-# TO DO:
-# 1. Need to figure out number rotation based heuristics
-# 2. Check for total heuristic
-def heuristic_cost(state):
-    total = 0
+def heuristic_cost(state, num_of_move_made=0):
+    misplaced_blocks = 0
+    total = num_of_move_made
     for i in range(len(state)):
         for j in range(len(state[0])):
             block = state[i][j]
             if block != ((5 * i) + j + 1):
+                misplaced_blocks += 1
                 total += find_distance_to_correct_position(
                     (i, j), find_correct_position_of_block(block)
                 )
@@ -222,13 +223,17 @@ def heuristic_cost(state):
                 #     ),
                 # )
 
+    # return total if total > misplaced_blocks else misplaced_blocks
     return total
 
 
 # TO DO:
-# 1. Prepare rotation functions
-# 2. Make use of the success functions
-# 3. Formulate Plan
+# TO DO:
+# 1. Populate all_successors with all the successors
+# 2. Sort the all_successors and pop the minimum succesors
+# 3. Additionally update successor function to work with already made move
+# 4. Prepare a heap based sorting method
+# 5. Every successor element will have the array, move_list, f_cost=g(n)+h(n)
 def solve(initial_board):
     """
     1. This function should return the solution as instructed in assignment, consisting of a list of moves like ["R2","D2","U1"].
@@ -260,29 +265,34 @@ def solve(initial_board):
 
     # goal_board = is_goal(state=curr_board)
     move_made = list()
-    min_cost_successor = sys.maxsize
+    all_successors = list()
+    # min_cost_successor = sys.maxsize
     while not is_goal(state=curr_board[0]):
-        print(min_cost_successor)
-        print(curr_board)
+        min_cost_successor = sys.maxsize
         # all_successors = successors(state=curr_board)
-
+        flag = 0
+        new_succesor_cost_container = list()
         for successor in successors(state=curr_board[0]):
             # print(successor)
             # break
-            new_succesor_cost = heuristic_cost(state=successor[0])
+            new_succesor_cost = heuristic_cost(
+                state=successor[0], num_of_move_made=len(move_made)
+            )
+            new_succesor_cost_container.append(new_succesor_cost)
             if new_succesor_cost < min_cost_successor:
                 min_cost_successor = new_succesor_cost
                 curr_board = copy.deepcopy(successor)
+                flag = 1
 
-            # if new_succesor_cost < min_cost_successor:
-            #     min_cost_successor = new_succesor_cost
-            #     curr_board = copy.deepcopy(successor)
-            #     print()
-            #     print("Found New Successor with cost ", min_cost_successor)
         # break
         # goal_board = is_goal(state=curr_board)
-        move_made.append(curr_board[1])
-        print(move_made)
+        print(new_succesor_cost_container)
+        print(curr_board)
+        if flag:
+            move_made.append(curr_board[1])
+        else:
+            break
+        # print(move_made)
     # print()
     # print(curr_board)
     # print(min_cost_successor)
