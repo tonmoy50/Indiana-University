@@ -9,7 +9,6 @@
 import sys
 import numpy as np
 import copy
-import math
 import heapq
 
 ROWS = 5
@@ -31,18 +30,20 @@ def is_goal(state):
         [16, 17, 18, 19, 20],
         [21, 22, 23, 24, 25],
     ]
-    for i,row in enumerate(state[1]):
-        if state[1][i]!=goal[i]:
+    for i, row in enumerate(state[1]):
+        if state[1][i] != goal[i]:
             return False
 
     return True
 
 
+# Finds the Manhattan distance of correct position of a block number
 def find_distance_to_correct_position(curr_pos, correct_pos):
     dist = abs(curr_pos[0] - correct_pos[0]) + abs(curr_pos[1] - correct_pos[1])
-    return dist//2
+    return dist // 2
 
 
+# Finds the correct position of a given block
 def find_correct_position_of_block(block):
     for i in range(5):
         for j in range(5):
@@ -51,22 +52,14 @@ def find_correct_position_of_block(block):
                 return (i, j)
 
 
-# Calculate manhattan distance from goal to current position of the whole board
+# Calculates the heuristic cost to reach the goal from any given state
 def heuristic_cost(state, num_of_move_made=0):
-    goal = [
-        [1, 2, 3, 4, 5],
-        [6, 7, 8, 9, 10],
-        [11, 12, 13, 14, 15],
-        [16, 17, 18, 19, 20],
-        [21, 22, 23, 24, 25],
-    ]
-    misplaced_blocks = 0
+    # num_of_move_made works as g(n) of our cost function and total is f(n)=g(n)+h(n)
     total = num_of_move_made
     for i in range(len(state)):
         for j in range(len(state[0])):
             block = state[i][j]
             if block != ((5 * i) + j + 1):
-                misplaced_blocks += 1
                 total += find_distance_to_correct_position(
                     (i, j), find_correct_position_of_block(block)
                 )
@@ -131,7 +124,7 @@ def transpose_board(board):
     return [list(col) for col in zip(*board)]
 
 
-# return a list of possible successor states
+# returns a list of possible successor states
 def successors(state):
     moves = {
         "R1",
@@ -262,15 +255,6 @@ def successors(state):
     return successive_boards
 
 
-def is_same_successor(matrix1, matrix2):
-    for i in range(len(matrix1)):
-        if matrix1[i] != matrix2[i]:
-            return False
-
-    return True
-
-
-# is_same_successor([[11, 1, 20, 4, 3], [6, 7, 8, 9, 5], [2, 12, 13, 14, 10], [17, 16, 24, 19, 15], [21, 22, 18, 23, 25]], )
 def solve(initial_board):
     """
     1. This function should return the solution as instructed in assignment, consisting of a list of moves like ["R2","D2","U1"].
@@ -285,7 +269,6 @@ def solve(initial_board):
         list(initial_board[i : i + 5]) for i in range(0, len(initial_board), 5)
     ]
     curr_state = (0, (curr_board), [])
-    move_made = list()
     all_successors = list()
     heapq.heappush(all_successors, curr_state)
     flag = 0
