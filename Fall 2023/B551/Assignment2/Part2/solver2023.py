@@ -24,30 +24,23 @@ def printable_board(board):
 
 # check if we've reached the goal
 def is_goal(state):
-    # if state == tuple(range(1, 26)):
-    #     return True
-    # else:
-    #     return False
+    goal = [
+        [1, 2, 3, 4, 5],
+        [6, 7, 8, 9, 10],
+        [11, 12, 13, 14, 15],
+        [16, 17, 18, 19, 20],
+        [21, 22, 23, 24, 25],
+    ]
+    for i,row in enumerate(state[1]):
+        if state[1][i]!=goal[i]:
+            return False
 
-    if heuristic_cost(state=state[1]) == 0:
-        return True
-    else:
-        return False
-
-
-# # Calculate the misplaced numbers for heuristic
-# def heuristic_cost(state):
-#     count = 0
-#     for i in range(len(state)):
-#         if i != state[i]:
-#             count += 1
-
-#     return count
+    return True
 
 
 def find_distance_to_correct_position(curr_pos, correct_pos):
     dist = abs(curr_pos[0] - correct_pos[0]) + abs(curr_pos[1] - correct_pos[1])
-    return dist if dist < 3 else math.ceil(dist / 2)
+    return dist//2
 
 
 def find_correct_position_of_block(block):
@@ -60,6 +53,13 @@ def find_correct_position_of_block(block):
 
 # Calculate manhattan distance from goal to current position of the whole board
 def heuristic_cost(state, num_of_move_made=0):
+    goal = [
+        [1, 2, 3, 4, 5],
+        [6, 7, 8, 9, 10],
+        [11, 12, 13, 14, 15],
+        [16, 17, 18, 19, 20],
+        [21, 22, 23, 24, 25],
+    ]
     misplaced_blocks = 0
     total = num_of_move_made
     for i in range(len(state)):
@@ -70,15 +70,8 @@ def heuristic_cost(state, num_of_move_made=0):
                 total += find_distance_to_correct_position(
                     (i, j), find_correct_position_of_block(block)
                 )
-                # print(
-                #     block,
-                #     find_distance_to_correct_position(
-                #         (i, j), find_correct_position_of_block(block)
-                #     ),
-                # )
-    misplaced_blocks += num_of_move_made
-    return total if total < misplaced_blocks else misplaced_blocks
-    # return total
+
+    return total
 
 
 def move_right(board, row):
@@ -172,8 +165,6 @@ def successors(state):
     move_made = state[2]
     for move in moves:
         turn, row = move[0], move[1 : len(move)]
-        # print(move)
-        # print(state)
         if turn == "R":
             copy_state = copy.deepcopy(board)
             copy_state = move_right(copy_state, int(row) - 1)
@@ -278,14 +269,8 @@ def is_same_successor(matrix1, matrix2):
 
     return True
 
+
 # is_same_successor([[11, 1, 20, 4, 3], [6, 7, 8, 9, 5], [2, 12, 13, 14, 10], [17, 16, 24, 19, 15], [21, 22, 18, 23, 25]], )
-# TO DO:
-# TO DO:
-# 1. Populate all_successors with all the successors
-# 2. Sort the all_successors and pop the minimum succesors
-# 3. Additionally update successor function to work with already made move
-# 4. Prepare a heap based sorting method
-# 5. Every successor element will have the array, move_list, f_cost=g(n)+h(n)
 def solve(initial_board):
     """
     1. This function should return the solution as instructed in assignment, consisting of a list of moves like ["R2","D2","U1"].
@@ -296,80 +281,22 @@ def solve(initial_board):
     4. You can assume that all test cases will be solvable.
     5. The current code just returns a dummy solution.
     """
-
-    goal = [
-        [1, 2, 3, 4, 5],
-        [6, 7, 8, 9, 10],
-        [11, 12, 13, 14, 15],
-        [16, 17, 18, 19, 20],
-        [21, 22, 23, 24, 25],
-    ]
     curr_board = [
         list(initial_board[i : i + 5]) for i in range(0, len(initial_board), 5)
     ]
     curr_state = (0, (curr_board), [])
-    # print(are_matrices_equal(goal, goal))
-    # print(heuristic_cost(curr_board))
-    # print(is_goal(curr_board))
-
-    # print(successors(curr_board))
-
-    # print(heuristic_cost(state=initial_board))
-
-    # goal_board = is_goal(state=curr_board)
     move_made = list()
     all_successors = list()
     heapq.heappush(all_successors, curr_state)
     flag = 0
-    while True:
+    while all_successors:
         flag += 1
         curr_state = heapq.heappop(all_successors)
-        print(len(all_successors), curr_state)
         if is_goal(curr_state):
             break
         for successor in successors(state=curr_state):
-            # if not any(
-            #     is_same_successor(successor[1], found_successor[1])
-            #     for found_successor in all_successors
-            # ):
             heapq.heappush(all_successors, successor)
 
-        # if flag == 5:
-        #     break
-
-    # for i,successor in enumerate(all_successors):
-    #     print(i, successor)
-    # min_cost_successor = sys.maxsize
-    # while not is_goal(state=curr_board[0]):
-    #     min_cost_successor = sys.maxsize
-    #     # all_successors = successors(state=curr_board)
-    #     flag = 0
-    #     new_succesor_cost_container = list()
-    #     for successor in successors(state=curr_board[0]):
-    #         # print(successor)
-    #         # break
-    #         new_succesor_cost = heuristic_cost(
-    #             state=successor[0], num_of_move_made=len(move_made)
-    #         )
-    #         new_succesor_cost_container.append(new_succesor_cost)
-    #         if new_succesor_cost < min_cost_successor:
-    #             min_cost_successor = new_succesor_cost
-    #             curr_board = copy.deepcopy(successor)
-    #             flag = 1
-
-    #     break
-    #     # goal_board = is_goal(state=curr_board)
-    #     print(new_succesor_cost_container)
-    #     print(curr_board)
-    #     if flag:
-    #         move_made.append(curr_board[1])
-    #     else:
-    #         break
-    #     print(move_made)
-    # print()
-    # print(curr_board)
-    # print(min_cost_successor)
-    print()
     return curr_state[2]
 
 
