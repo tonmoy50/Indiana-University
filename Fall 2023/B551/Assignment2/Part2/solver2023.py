@@ -41,7 +41,7 @@ def is_goal(state):
 def find_distance_to_correct_position(curr_pos, correct_pos):
     dist = abs(curr_pos[0] - correct_pos[0]) + abs(curr_pos[1] - correct_pos[1])
     # return dist // 2 if dist <= 3 else dist // 4
-    return dist // 2
+    return dist / 5
 
 
 # Finds the correct position of a given block
