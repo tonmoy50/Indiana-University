@@ -24,44 +24,42 @@ def min_cost(root):
                 cost = cost_left + cost_right
             elif node.operator == "or":
                 cost = min(cost_left, cost_right)
-            else:
-                raise ValueError("Unsupported operator")
 
         memo[node] = cost
         return cost
 
     return dp(root)
 
-
-root = TreeNode(
-    operator="and",
-    left=TreeNode(
-        operator="or", left=TreeNode(value=True), right=TreeNode(value=False)
-    ),
-    right=TreeNode(
+if __name__ == "__main__":
+    root = TreeNode(
         operator="and",
-        left=TreeNode(value=False),
-        right=TreeNode(
-            operator="and", left=TreeNode(value=False), right=TreeNode(value=False)
+        left=TreeNode(
+            operator="or", left=TreeNode(value=True), right=TreeNode(value=False)
         ),
-    ),
-)
+        right=TreeNode(
+            operator="and",
+            left=TreeNode(value=False),
+            right=TreeNode(
+                operator="and", left=TreeNode(value=False), right=TreeNode(value=False)
+            ),
+        ),
+    )
 
-result = min_cost(root)
-print("Minimum cost for the cake:", result)
+    result = min_cost(root)
+    print("Minimum cost for the cake:", result)
 
-root = TreeNode(
-    operator="and",
-    left=TreeNode(
-        operator="or", left=TreeNode(value=True), right=TreeNode(value=False)
-    ),
-    right=TreeNode(
+    root = TreeNode(
         operator="and",
-        left=TreeNode(value=True),
-        right=TreeNode(value=True),
-    ),
-)
+        left=TreeNode(
+            operator="or", left=TreeNode(value=True), right=TreeNode(value=False)
+        ),
+        right=TreeNode(
+            operator="and",
+            left=TreeNode(value=True),
+            right=TreeNode(value=True),
+        ),
+    )
 
-# Calculate the minimum cost for the cake
-result = min_cost(root)
-print("Minimum cost for the cake:", result)
+
+    result = min_cost(root)
+    print("Minimum cost for the cake:", result)
