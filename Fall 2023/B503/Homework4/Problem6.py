@@ -1,82 +1,53 @@
-# A recursive function used by longestPath. See below
-# link for details
-# https:#www.geeksforgeeks.org/topological-sorting/
-def topologicalSortUtil(v):
-	global Stack, visited, adj
-	visited[v] = True
+from collections import defaultdict
 
-	# Recur for all the vertices adjacent to this vertex
-	# list<AdjListNode>::iterator i
-	for i in adj[v]:
-		if (not visited[i[0]]):
-			topologicalSortUtil(i[0])
 
-	# Push current vertex to stack which stores topological
-	# sort
-	Stack.append(v)
+# Perform a topological sort of the graph
+def topological_sort(graph):
+    visited = set()
+    sorted_nodes = []
 
-# The function to find longest distances from a given vertex.
-# It uses recursive topologicalSortUtil() to get topological
-# sorting.
-def longestPath(s):
-	global Stack, visited, adj, V
-	dist = [-10**9 for i in range(V)]
+    def visit(node):
+        if node not in visited:
+            visited.add(node)
+            for successor in graph[node]:
+                visit(successor)
+            sorted_nodes.append(node)
 
-	# Call the recursive helper function to store Topological
-	# Sort starting from all vertices one by one
-	for i in range(V):
-		if (visited[i] == False):
-			topologicalSortUtil(i)
-	# print(Stack)
+    for node in graph:
+        visit(node)
 
-	# Initialize distances to all vertices as infinite and
-	# distance to source as 0
-	dist[s] = 0
-	# Stack.append(1)
+    return sorted_nodes[::-1]
 
-	# Process vertices in topological order
-	while (len(Stack) > 0):
 
-		# Get the next vertex from topological order
-		u = Stack[-1]
-		del Stack[-1]
-		#print(u)
+# Find the longest path in a directed acyclic graph
+def longest_path(graph, weights):
+    sorted_nodes = topological_sort(graph)
+    dist = defaultdict(lambda: float("-inf"))
+    dist[sorted_nodes[0]] = 0
 
-		# Update distances of all adjacent vertices
-		# list<AdjListNode>::iterator i
-		if (dist[u] != 10**9):
-			for i in adj[u]:
-				# print(u, i)
-				if (dist[i[0]] < dist[u] + i[1]):
-					dist[i[0]] = dist[u] + i[1]
+    for node in sorted_nodes:
+        # for i in range(1, len(graph[node])):
+        #     if weights[node, graph[node][i-1]] < weights[node, graph[node][i-1]]:
+        #         dist[graph[node][i]] = max(dist[graph[node][i]], dist[node] + weights[(node, graph[node][i])])
+        successors = list()
+        for successor in graph[node]:
+            dist[successor] = max(
+                dist[successor], dist[node] + weights[(node, successor)]
+            )
+            successors.append(successor)
 
-	# Print calculated longest distances
-	# print(dist)
-	for i in range(V):
-		print("INF ",end="") if (dist[i] == -10**9) else print(dist[i],end=" ")
+    # for node in graph:
+    #     for i in range(1, len(graph[node])):
+    #         if weights[node, graph[node][i]] < weights[node, graph[node][i - 1]]:
+    #             dist[node] = -1
+    #             break
+    print(dist)
+    return max(dist.values())
 
-# Driver code
-if __name__ == '__main__':
-	V, Stack, visited = 6, [], [False for i in range(7)]
-	adj = [[] for i in range(7)]
 
-	# Create a graph given in the above diagram.
-	# Here vertex numbers are 0, 1, 2, 3, 4, 5 with
-	# following mappings:
-	# 0=r, 1=s, 2=t, 3=x, 4=y, 5=z
-	adj[0].append([1, 5])
-	adj[0].append([2, 3])
-	adj[1].append([3, 6])
-	adj[1].append([2, 2])
-	adj[2].append([4, 4])
-	adj[2].append([5, 2])
-	adj[2].append([3, 7])
-	adj[3].append([5, 1])
-	adj[3].append([4, -1])
-	adj[4].append([5, -2])
+# Example graph
+graph = {"A": ["B", "C"], "B": ["D", "E"], "C": ["E"], "D": [], "E": []}
 
-	s = 1
-	print("Following are longest distances from source vertex ",s)
-	longestPath(s)
+weights = {("A", "B"): 2, ("A", "C"): 4, ("B", "D"): 3, ("B", "E"): 1, ("C", "E"): 4}
 
-	# This code is contributed by mohit kumar 29.
+print(longest_path(graph, weights))  # Output: 8
