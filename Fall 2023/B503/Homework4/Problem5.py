@@ -8,9 +8,6 @@ def calculate_maximum_reward(n, M):
         if i < n:
             OPT[i][i + 1] = M[i][i + 1]
 
-    print(OPT)
-    print()
-
     # Fill the matrix using the recurrence relationship
     for l in range(2, n + 1):
         for i in range(1, n - l + 2):
