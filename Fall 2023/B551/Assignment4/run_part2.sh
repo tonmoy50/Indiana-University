@@ -1,0 +1,1 @@
+python ./Part2/image2text.py ./Part2/test_images/courier-train.png Part2/train-text.txt Part2/test_images/test-7-0.png
