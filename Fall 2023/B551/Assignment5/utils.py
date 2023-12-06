@@ -9,14 +9,19 @@ import numpy as np
 
 def euclidean_distance(x1, x2):
     """
+    
     Computes and returns the Euclidean distance between two vectors.
 
     Args:
         x1: A numpy array of shape (n_features,).
         x2: A numpy array of shape (n_features,).
     """
+    mySum = 0
+    for i in range(len(x1)):
+        mySum += np.power(x1[i] - x2[i], 2)
 
     return np.linalg.norm(x1 - x2)
+
 
 
 def manhattan_distance(x1, x2):
@@ -27,8 +32,12 @@ def manhattan_distance(x1, x2):
         x1: A numpy array of shape (n_features,).
         x2: A numpy array of shape (n_features,).
     """
+    mySum = 0
+    for i in range(len(x1)):
+        mySum += np.abs(x1[i] - x2[i])
 
     return np.sum(np.abs(x1 - x2))
+
 
 
 def identity(x, derivative=False):
@@ -58,6 +67,7 @@ def sigmoid(x, derivative=False):
         return 1 / (1 + np.exp(-x))
 
 
+
 def tanh(x, derivative=False):
     """
     Computes and returns the hyperbolic tangent activation function of the given input data x. If derivative = True,
@@ -80,6 +90,7 @@ def relu(x, derivative=False):
         derivative: A boolean representing whether or not the derivative of the function should be returned instead.
     """
     return np.where(x > 0, 1, 0) if derivative else np.where(x > 0, x, 0)
+
 
 
 def softmax(x, derivative=False):
@@ -112,6 +123,7 @@ def cross_entropy(y, p):
     return loss
 
 
+
 def one_hot_encoding(y):
     """
     Converts a vector y of categorical target class values into a one-hot numeric array using one-hot encoding: one-hot
@@ -130,3 +142,4 @@ def one_hot_encoding(y):
     one_hot_matrix = np.eye(len(unique_classes))
 
     return one_hot_matrix[encoded_y]
+

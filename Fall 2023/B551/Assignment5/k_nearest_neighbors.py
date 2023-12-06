@@ -43,6 +43,7 @@ class KNearestNeighbors:
     """
 
     def __init__(self, n_neighbors = 5, weights = 'uniform', metric = 'l2'):
+        
         # Check if the provided arguments are valid
         if weights not in ['uniform', 'distance'] or metric not in ['l1', 'l2'] or not isinstance(n_neighbors, int):
             raise ValueError('The provided class parameter arguments are not recognized.')
@@ -64,9 +65,12 @@ class KNearestNeighbors:
 
         Returns:
             None.
-        """
-
-        raise NotImplementedError('This function must be implemented by the student.')
+        """ 
+        # raise NotImplementedError('This function must be implemented by the student.')
+        mat = []
+        for input, label in zip(X, y):
+            mat.append( (input, label) )
+        return mat
 
     def predict(self, X):
         """
@@ -78,5 +82,7 @@ class KNearestNeighbors:
         Returns:
             A numpy array of shape (n_samples,) representing the predicted target class values for the given test data.
         """
-
-        raise NotImplementedError('This function must be implemented by the student.')
+        #print(len(X))
+        #self.fit()
+        return X
+        #raise NotImplementedError('This function must be implemented by the student.')

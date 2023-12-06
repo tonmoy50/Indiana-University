@@ -125,6 +125,7 @@ class MultilayerPerceptron:
         self._o_weights = None
         self._o_bias = None
 
+
     def _initialize(self, X, y):
         """
         Function called at the beginning of fit(X, y) that performs one hot encoding for the target class values and
@@ -188,6 +189,7 @@ class MultilayerPerceptron:
         self._o_weights -= self.learning_rate * error_weights_o
         self._o_bias -= self.learning_rate * error_bias_o
 
+
     def fit(self, X, y):
         self._initialize(X, y)
 
@@ -229,6 +231,7 @@ class MultilayerPerceptron:
             )
         )
 
+
     def predict(self, X):
         """
         Predicts class target values for the given test data matrix X using the fitted classifier model.
@@ -250,6 +253,7 @@ class MultilayerPerceptron:
             + self._o_bias
         )
 
+
         # Convert the one-hot output from the network into a vector of class labels
         return_predictions = np.zeros(X.shape[0])
         for return_index, row in enumerate(return_predictions_one_hot_encoded):
@@ -258,3 +262,4 @@ class MultilayerPerceptron:
         # print(return_predictions)
 
         return return_predictions
+

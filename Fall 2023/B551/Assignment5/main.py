@@ -19,6 +19,22 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.datasets import load_iris, load_digits
 from sklearn.preprocessing import StandardScaler
+from utils import euclidean_distance, manhattan_distance
+from queue import PriorityQueue as PQ
+from dataclasses import dataclass, field
+from typing import Any 
+
+# create class used to wrap data before pushing it into queue
+# class adapted from: https://docs.python.org/3/library/queue.html?highlight=priorityqueue#queue.PriorityQueue
+@dataclass(order=True)
+class PrioritizedItem:
+    priority: float
+    item: Any=field(compare=False)
+    def __getitem__(self):
+         return self.item
+    def __getpriority__(self):
+         return self.priority
+# end of adapted code
 
 import warnings
 from sklearn.exceptions import ConvergenceWarning
@@ -37,6 +53,7 @@ def test_knn():
     params_list = [
         dict(zip(param_dict.keys(), v)) for v in product(*param_dict.values())
     ]
+
     params_len = len(params_list)
 
     knn_iris_results = pd.DataFrame(
@@ -66,27 +83,51 @@ def test_knn():
         sklearn_model.fit(X_train_i, y_train_i)
         y_pred = sklearn_model.predict(X_test_i)
 
-        knn_iris_results.loc[len(knn_iris_results)] = [
-            "Sklearn",
-            params["n_neighbors"],
-            params["weights"],
-            params["metric"],
-            round(accuracy_score(y_test_i, y_pred), 3),
-        ]
 
-        my_model = KNearestNeighbors(
-            params["n_neighbors"], params["weights"], params["metric"]
-        )
-        my_model.fit(X_train_i, y_train_i)
-        y_pred = my_model.predict(X_test_i)
+        knn_iris_results.loc[len(knn_iris_results)] = ['Sklearn',
+                                                       params['n_neighbors'],
+                                                       params['weights'],
+                                                       params['metric'],
+                                                       round(accuracy_score(y_test_i, y_pred), 3)]
 
-        knn_iris_results.loc[len(knn_iris_results)] = [
-            "My Model",
-            params["n_neighbors"],
-            params["weights"],
-            params["metric"],
-            round(accuracy_score(y_test_i, y_pred), 3),
-        ]
+        my_model = KNearestNeighbors(params['n_neighbors'], params['weights'], params['metric'])
+        train = my_model.fit(X_train_i, y_train_i)
+        
+        y_temp = my_model.predict(X_test_i)
+        #print(len(y_temp[0]))
+        myQ = PQ()
+        myDir = {'0': 0, '1': 0, '2': 0}
+        y_pred1 = []
+        for i in range(len(y_temp)):
+            myDir['0'] = 0
+            myDir['1'] = 0
+            myDir['2'] = 0
+            myQ = PQ()
+            for j in range(len(train)):
+                if params['metric'] == 'l2':
+                    myQ.put( PrioritizedItem(euclidean_distance(y_temp[i], train[j][0]), train[j][1]) )
+                if params['metric'] == 'l1':
+                    myQ.put( PrioritizedItem(manhattan_distance(y_temp[i], train[j][0]), train[j][1]) )
+        
+            for k in range(params['n_neighbors']):
+                temp = myQ.get()
+                if params['weights'] == 'uniform':
+                    myDir[str(temp.item)] += 1
+                if params['weights'] == 'distance':
+                    if temp.priority == 0:
+                        myDir[str(temp.item)] += np.inf
+                    else:
+                        myDir[str(temp.item)] += 1 / temp.priority
+            Keymax = max(zip(myDir.values(), myDir.keys()))[1]
+        #print(Keymax)   
+            y_pred1.append(int(Keymax))
+        
+       # print(len(y_pred1))
+        knn_iris_results.loc[len(knn_iris_results)] = ['My Model',
+                                                       params['n_neighbors'],
+                                                       params['weights'],
+                                                       params['metric'],
+                                                       round(accuracy_score(y_test_i, y_pred1), 3)]
 
         knn_iris_results.loc[len(knn_iris_results)] = ["", "", "", "", ""]
 
@@ -119,35 +160,64 @@ def test_knn():
         sklearn_model.fit(X_train_d, y_train_d)
         y_pred = sklearn_model.predict(X_test_d)
 
-        knn_digits_results.loc[len(knn_digits_results)] = [
-            "Sklearn",
-            params["n_neighbors"],
-            params["weights"],
-            params["metric"],
-            round(accuracy_score(y_test_d, y_pred), 3),
-        ]
 
-        my_model = KNearestNeighbors(
-            params["n_neighbors"], params["weights"], params["metric"]
-        )
-        my_model.fit(X_train_d, y_train_d)
-        y_pred = my_model.predict(X_test_d)
+        knn_digits_results.loc[len(knn_digits_results)] = ['Sklearn',
+                                                           params['n_neighbors'],
+                                                           params['weights'],
+                                                           params['metric'],
+                                                           round(accuracy_score(y_test_d, y_pred), 3)]
 
-        knn_digits_results.loc[len(knn_digits_results)] = [
-            "My Model",
-            params["n_neighbors"],
-            params["weights"],
-            params["metric"],
-            round(accuracy_score(y_test_d, y_pred), 3),
-        ]
+        my_model = KNearestNeighbors(params['n_neighbors'], params['weights'], params['metric'])
+        train = my_model.fit(X_train_d, y_train_d)
+        
+        y_temp = my_model.predict(X_test_d)
+        #print(len(y_temp[0]))
+        myQ = PQ()
+        myDir = {'0': 0, '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0, '7': 0, '8': 0, '9': 0}
+        y_pred1 = []
+        for i in range(len(y_temp)):
+            myDir['0'] = 0
+            myDir['1'] = 0
+            myDir['2'] = 0
+            myDir['3'] = 0
+            myDir['4'] = 0
+            myDir['5'] = 0
+            myDir['6'] = 0
+            myDir['7'] = 0
+            myDir['8'] = 0
+            myDir['9'] = 0
 
-        knn_digits_results.loc[len(knn_digits_results)] = ["", "", "", "", ""]
+            myQ = PQ()
+            for j in range(len(train)):
+                if params['metric'] == 'l2':
+                    myQ.put( PrioritizedItem(euclidean_distance(y_temp[i], train[j][0]), train[j][1]) )
+                if params['metric'] == 'l1':
+                    myQ.put( PrioritizedItem(manhattan_distance(y_temp[i], train[j][0]), train[j][1]) )
+        
+            for k in range(params['n_neighbors']):
+                temp = myQ.get()
+                if params['weights'] == 'uniform':
+                    myDir[str(temp.item)] += 1
+                if params['weights'] == 'distance':
+                    if temp.priority == 0:
+                        myDir[str(temp.item)] += np.inf
+                    else:
+                        myDir[str(temp.item)] += 1 / temp.priority
+            Keymax = max(zip(myDir.values(), myDir.keys()))[1]
+        #print(Keymax)   
+            y_pred1.append(int(Keymax))
 
-    print("\n")
+        knn_digits_results.loc[len(knn_digits_results)] = ['My Model',
+                                                          params['n_neighbors'],
+                                                           params['weights'],
+                                                           params['metric'],
+                                                           round(accuracy_score(y_test_d, y_pred1), 3)]
+        knn_digits_results.loc[len(knn_digits_results)] = ['', '', '', '', '']
 
-    print("Exporting KNN Results to HTML Files...\n")
-    knn_iris_results.to_html("knn_iris_results.html")
-    knn_digits_results.to_html("knn_digits_results.html")
+    print('\n')
+    print('Exporting KNN Results to HTML Files...\n')
+    knn_iris_results.to_html('knn_iris_results.html')
+    knn_digits_results.to_html('knn_digits_results.html')
 
     print("Done Testing K-Nearest Neighbors Classification!\n")
 
