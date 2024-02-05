@@ -1,5 +1,4 @@
 from scipy import fftpack
-from scipy import stats as st
 from scipy import ndimage
 import imageio.v2 as imageio
 import numpy as np
@@ -11,11 +10,11 @@ def get_spectogram(image):
     return (np.log(abs(fft2)) * 255 / np.amax(np.log(abs(fft2)))).astype(np.uint8)
 
 
-def gkern(kernlen=21, nsig=3):
-    x = np.linspace(-nsig, nsig, kernlen + 1)
-    kern1d = np.diff(st.norm.cdf(x))
-    kern2d = np.outer(kern1d, kern1d)
-    return kern2d / kern2d.sum()
+def get_kernel(size, sigma=1.0):
+    x = np.zeros((size, size))
+    x[size // 2, size // 2] = 1
+    y = ndimage.filters.gaussian_filter(x, sigma=sigma)
+    return y / y.sum()
 
 
 if __name__ == "__main__":
@@ -51,15 +50,20 @@ if __name__ == "__main__":
     # space. Here's a little example (that makes a nearly
     # imperceptible change, but demonstrates what you can do.
 
-    # fft2[1, 1] = fft2[1, 1] + 1
+    # The Secret Message is: HI
+    # I tried to use low pass filtering with a gussian kernel to remove the secret message from the image. The gaussian kernel was applied through the entire image in a 2x2 window with an offset of 2.
+    offset = size = 2
+    kernel = get_kernel(size, 30)
+    fft2_new = fft2.copy()
 
-    # Workspace Start
-    fft2 = ndimage.gaussian_filter(fft2, 3, radius=30)
-
-    imageio.imsave(
-        os.path.join(CURR_DIR, "convolved.png"),
-        (np.log(abs(fft2)) * 255 / np.amax(np.log(abs(fft2)))).astype(np.uint8),
-    )
+    for i in range(0, fft2_new.shape[0], offset):
+        for j in range(0, fft2_new.shape[1], offset):
+            if i + size > fft2_new.shape[0] or j + size > fft2_new.shape[1]:
+                continue
+            fft2_new[i : i + size, j : j + size] = (
+                fft2_new[i : i + size, j : j + size] * kernel
+            )
+    fft2 = fft2_new
 
     # Workspace End
 
