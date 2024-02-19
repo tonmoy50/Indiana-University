@@ -1,0 +1,1 @@
+python3 ./inject.py test-images/blank_form.jpg test-images/a-3_groundtruth.txt injected.jpg

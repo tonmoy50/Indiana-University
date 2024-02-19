@@ -1,0 +1,1 @@
+python ./grade.py test-images/a-30.jpg output.txt
